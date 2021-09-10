@@ -1,0 +1,36 @@
+ul > li {
+    list-style: none;
+}
+
+section {
+    padding: 20px;
+    max-width: 200px;
+}
+
+#sidebar {
+    max-width: 300px;
+}
+
+#wrapper {
+    display: flex;
+    justify-content: flex-start;
+}
+
+#sidebar {
+    flex: 1;
+}
+
+#playground {
+    margin-top: 50px;
+    margin-right: 20px;
+    min-height: 630px;
+    flex: 2;
+    background-color: #96c3ec;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#my_dataviz {
+    
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <link rel="stylesheet" href="assets/css/datanvi.css">
+    <title>Southeast Asian Countries Covid Cases and GDP Visualization</title>
+</head>
+<body>
+    
+    <div id="wrapper">
+
+        <div id="sidebar">
+            <section>
+                <strong>Type of Chart</strong>
+                <select>
+                    <option value="">Covid Cases</option>
+                    <option value="">GDP % Growth</option>
+                    <option value="">Covid Cases + GDP % Growth</option>
+                </select>
+            </section>
+
+            <section>
+                <strong>SEA Countries</strong>
+                <ul>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Brunei')">Brunei</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Burma (Myanmar)')">Burma (Myanmar)</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Cambodia')">Cambodia</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Indonesia')">Indonesia</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Laos')">Laos</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Malaysia')">Malaysia</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Philippines')">Philippines</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Singapore')">Singapore</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Thailand')">Thailand</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Timor Leste')">Timor Leste</input></li>
+                    <li><input type="checkbox" class="countries" onclick="filterCountry(event, 'Vietnam')">Vietnam</input></li>
+                </ul>
+            </section>
+
+            <section>
+                <strong>Year and Quarter</strong>
+                <ul>
+                    <li><input type="checkbox" class="countries">2019 Q4</input></li>
+                    <li><input type="checkbox" class="countries">2020 Q1</input></li>
+                    <li><input type="checkbox" class="countries">2020 Q2</input></li>
+                    <li><input type="checkbox" class="countries">2020 Q3</input></li>
+                    <li><input type="checkbox" class="countries">2020 Q4</input></li>
+                    <li><input type="checkbox" class="countries">2021 Q1</input></li>
+                </ul>
+            </section>
+        </div>
+
+        <div id="playground">
+            <div id="my_dataviz"></div>
+        </div>
+    
+    </div>
+</body>
+<script src="index.js"></script>
+</html>
