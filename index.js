@@ -1,5 +1,13 @@
 let countryArray = []
 
+const inputs = Array.from(document.getElementsByTagName('input'))
+inputs.forEach(input => {
+  input.checked = true
+  input.type = "checkbox"
+  input.onclick = "update()"
+})
+
+
 // set the dimensions and margins of the graph
 const margin = {top: 20, right: 30, bottom: 40, left: 90},
     width = 460 - margin.left - margin.right,
@@ -14,12 +22,21 @@ const svg = d3.select("#my_dataviz")
   .append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-function update() {
+async function update() {
 
     // Parse the Data
-    d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv").then( function(data) {
+    const data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+    let types = Array.from(document.getElementsByClassName('types'))
+    let countries = Array.from(document.getElementsByClassName('countries'))
+    let quarters = Array.from(document.getElementsByClassName('quarters'))
+
+    types = types.filter( t => t.checked)
+    countries = countries.filter( c => c.checked)
+    quarters = quarters.filter( q => q.checked)
     
-        console.log(data)
+    console.log(quarters)
+
+    if (quarters.length === 1) {
       // Add X axis
       const x = d3.scaleLinear()
         .domain([0, 1600000])
@@ -48,8 +65,7 @@ function update() {
         .attr("width", d => x(d['2021-1']))
         .attr("height", y.bandwidth())
         .attr("fill", "#5891ad")
-        
-    })
+    }
 }
 
 
@@ -67,7 +83,8 @@ function filterCountry(event, country) {
 update()
 
 function reset(classname) {
-  const types = document.getElementsByClassName(classname)
+  let types = Array.from(document.getElementsByClassName(classname))
+  types = types.filter( type => type.checked)
   
   for (let type of types) {
     type.checked = true
