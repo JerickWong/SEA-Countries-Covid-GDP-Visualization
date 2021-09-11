@@ -65,3 +65,13 @@ function filterCountry(event, country) {
 }
 
 update()
+
+function reset(classname) {
+  const types = document.getElementsByClassName(classname)
+  
+  for (let type of types) {
+    type.checked = true
+  }
+
+  update()
+}
