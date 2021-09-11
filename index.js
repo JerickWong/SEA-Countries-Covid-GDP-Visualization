@@ -4,7 +4,7 @@ const inputs = Array.from(document.getElementsByTagName('input'))
 inputs.forEach(input => {
   input.checked = true
   input.type = "checkbox"
-  input.onclick = "update()"
+  input.onclick = update
 })
 
 
@@ -62,7 +62,7 @@ async function update() {
         .join("rect")
         .attr("x", x(0) )
         .attr("y", d => y(d.Country))
-        .attr("width", d => x(d['2021-1']))
+        .attr("width", d => x(d[quarters[0].name]))
         .attr("height", y.bandwidth())
         .attr("fill", "#5891ad")
     }
