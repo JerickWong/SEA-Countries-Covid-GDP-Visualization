@@ -22,6 +22,13 @@ const svg = d3.select("#my_dataviz")
   .append("g")
     .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
+// x and x axis naman
+// made dynamically moving
+
+const y = d3.scaleBand()
+  .range([ 0, height ])
+const yAxis = svg.append("g")
+
 async function update() {
 
     // Parse the Data
@@ -38,6 +45,8 @@ async function update() {
 
     if (quarters.length === 1) {
       // Add X axis
+      svg.selectAll("*").remove();
+
       const x = d3.scaleLinear()
         .domain([0, 1600000])
         .range([ 0, width]);
@@ -49,36 +58,38 @@ async function update() {
           .style("text-anchor", "end");
     
       // Y axis
-      const y = d3.scaleBand()
-        .range([ 0, height ])
+      y
         .domain(data.map(d => d.Country))
         .padding(.1);
       svg.append("g")
         .call(d3.axisLeft(y))
-    
-      //Bars
-      svg.selectAll("myRect")
-        .data(data)
-        .join("rect")
-        .attr("x", x(0) )
+
+      // variable u: map data to existing bars
+      const u = svg.selectAll("rect")
+      .data(data)
+
+      // update bars
+      u.join("rect")
+      .transition()
+      .duration(1000)
+        .attr("x", x(0))
         .attr("y", d => y(d.Country))
         .attr("width", d => x(d[quarters[0].name]))
         .attr("height", y.bandwidth())
         .attr("fill", "#5891ad")
+    
+      //Bars
+      // svg.selectAll("myRect")
+      //   .data(data)
+      //   .join("rect")
+      //   .attr("x", x(0) )
+      //   .attr("y", d => y(d.Country))
+      //   .attr("width", d => x(d[quarters[0].name]))
+      //   .attr("height", y.bandwidth())
+      //   .attr("fill", "#5891ad")
     }
 }
 
-
-function filterCountry(event, country) {
-    if(event.target.checked) {
-        countryArray.push(country)
-    } else {
-        const temp = countryArray.filter(a => a != country)
-        countryArray = [...temp]
-    }
-
-    update()
-}
 
 update()
 
