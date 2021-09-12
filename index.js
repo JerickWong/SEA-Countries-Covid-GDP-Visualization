@@ -32,7 +32,7 @@ const yAxis = svg.append("g")
 async function update() {
 
     // Parse the Data
-    const data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+    let data
     let types = Array.from(document.getElementsByClassName('types'))
     let countries = Array.from(document.getElementsByClassName('countries'))
     let quarters = Array.from(document.getElementsByClassName('quarters'))
@@ -40,16 +40,29 @@ async function update() {
     types = types.filter( t => t.checked)
     countries = countries.filter( c => c.checked)
     quarters = quarters.filter( q => q.checked)
-    
-    console.log(quarters)
 
-    if (quarters.length === 1) {
+    if (quarters.length === 1 && types.length === 1) {
       // Add X axis
       svg.selectAll("*").remove();
 
+      let ti = {}
+      if (types.length===1) {
+        if (types[0].name==="Covid") {
+          ti.x = 0
+          ti.y = 1600000
+          data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+        } else {
+          ti.x = -20
+          ti.y = 30
+          data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
+        }
+          
+      }
+
       const x = d3.scaleLinear()
-        .domain([0, 1600000])
-        .range([ 0, width]);
+      .domain([ti.x, ti.y])
+      .range([ 0, width]);
+
       svg.append("g")
         .attr("transform", `translate(0, ${height})`)
         .call(d3.axisBottom(x))
@@ -73,7 +86,7 @@ async function update() {
       u.join("rect")
       .transition()
       .duration(1000)
-        .attr("x", x(0))
+        .attr("x", x(ti.x))
         .attr("y", d => y(d.Country))
         .attr("width", d => x(d[quarters[0].name]))
         .attr("height", y.bandwidth())
