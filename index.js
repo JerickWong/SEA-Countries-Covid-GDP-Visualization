@@ -58,15 +58,16 @@ async function update() {
           .style("text-anchor", "end");
     
       // Y axis
+      const filtered = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
       y
-        .domain(data.map(d => d.Country))
+        .domain(filtered.map(f => f.Country))
         .padding(.1);
       svg.append("g")
         .call(d3.axisLeft(y))
 
       // variable u: map data to existing bars
       const u = svg.selectAll("rect")
-      .data(data)
+      .data(filtered)
 
       // update bars
       u.join("rect")
@@ -95,7 +96,6 @@ update()
 
 function reset(classname) {
   let types = Array.from(document.getElementsByClassName(classname))
-  types = types.filter( type => type.checked)
   
   for (let type of types) {
     type.checked = true
