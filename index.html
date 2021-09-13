@@ -53,7 +53,7 @@
                 <span>Combine Graphs</span>
                 <!-- Rounded switch -->
                 <label class="switch">
-                    <input type="checkbox">
+                    <input type="checkbox" id='combined'>
                     <span class="slider round"></span>
                 </label>
             </section>
@@ -101,7 +101,7 @@
     content: "";
     height: 18px;
     width: 17px;
-    left: 2px;
+    left: 1px;
     bottom: 2px;
     background-color: white;
     -webkit-transition: .4s;
@@ -117,9 +117,9 @@
     }
 
     input:checked + .slider:before {
-    -webkit-transform: translateX(16px);
-    -ms-transform: translateX(16px);
-    transform: translateX(16px);
+    -webkit-transform: translateX(17px);
+    -ms-transform: translateX(17px);
+    transform: translateX(17px);
     }
 
     /* Rounded sliders */

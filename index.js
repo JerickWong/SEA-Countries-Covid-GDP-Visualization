@@ -47,7 +47,13 @@ async function update() {
     countries = countries.filter( c => c.checked)
     quarters = quarters.filter( q => q.checked)
 
-    if (quarters.length === 1 && types.length === 1) {
+    let combined = document.getElementById('combined')
+
+    if (combined.checked) {
+      combinedGraph()
+    }
+
+    else if (quarters.length === 1 && types.length === 1) {
       // Add X axis
       svg.selectAll("*").remove();
 
@@ -73,7 +79,7 @@ async function update() {
       
       y = d3.scaleBand()
       .range([ 0, height ])
-      
+
       y
         .domain(filtered.map(f => f.Country))
         .padding(.1);
@@ -96,30 +102,43 @@ async function update() {
     }
 }
 
-d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv").then( function(data) {
+async function combinedGraph() {
 
-  
+  let data
+  let types = Array.from(document.getElementsByClassName('types'))
+  let countries = Array.from(document.getElementsByClassName('countries'))
   let quarters = Array.from(document.getElementsByClassName('quarters'))
+
+  types = types.filter( t => t.checked)
+  countries = countries.filter( c => c.checked)
   quarters = quarters.filter( q => q.checked)
+
+  if (types.length === 1 && types[0].name === "Covid") {
+    data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+  } else {
+    data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
+  }
   
   const newData = [] 
   quarters.forEach(q => data.forEach(d => newData.push({Country: d.Country, year: q.name, n: Number(d[q.name])})))
   
   // group the data: I want to draw one line per group
   const sumstat = d3.group(newData, d => d.Country); // nest function allows to group the calculation per level of a factor
-  console.log(sumstat)
+  console.log(newData)
   // Add X axis --> it is a date format
   const x = d3.scaleBand([0, width])
     .domain(quarters.map(q => q.name))
     .rangeRound([ 0, width ]);
   
+  svg.selectAll("*").remove();
   svg.append("g")
     .attr("transform", `translate(0, ${height})`)
     .call(d3.axisBottom(x).ticks(5));
 
   // Add Y axis
   y = d3.scaleLinear()
-    .domain([0, d3.max(newData, function(d) { return +d.n; })])
+    // .domain([0, d3.max(newData, function(d) { return +d.n; })])
+    .domain(d3.extent(newData, function(d) { return +d.n; }))
     .range([ height, 0 ]);
   svg.append("g")
     .call(d3.axisLeft(y));
@@ -141,11 +160,12 @@ d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv").then( function(data) 
             .y(function(d) { return y(+d.n); })
             (d[1])
         })
+    
+}
 
-})
 
 
-// update()
+update()
 
 function reset(classname) {
   let types = Array.from(document.getElementsByClassName(classname))
