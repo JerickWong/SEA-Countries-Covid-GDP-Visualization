@@ -109,6 +109,12 @@ async function combinedGraph() {
   let countries = Array.from(document.getElementsByClassName('countries'))
   let quarters = Array.from(document.getElementsByClassName('quarters'))
 
+  let filteredColors = [...colors]
+
+  for (let i = countries.length-1; i >= 0; i--) {
+    if (!countries[i].checked)
+      filteredColors.splice(i, 1)
+  }
   types = types.filter( t => t.checked)
   countries = countries.filter( c => c.checked)
   quarters = quarters.filter( q => q.checked)
@@ -119,6 +125,9 @@ async function combinedGraph() {
     data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
   }
   
+  data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
+  console.log(data)
+
   const newData = [] 
   quarters.forEach(q => data.forEach(d => newData.push({Country: d.Country, year: q.name, n: Number(d[q.name])})))
   
@@ -145,7 +154,7 @@ async function combinedGraph() {
 
   // color palette
   const color = d3.scaleOrdinal()
-    .range(colors)
+    .range(filteredColors)
 
   // Draw the line
   svg.selectAll(".line")
