@@ -38,5 +38,7 @@ a {
 }
 
 #my_dataviz {
-    
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }
