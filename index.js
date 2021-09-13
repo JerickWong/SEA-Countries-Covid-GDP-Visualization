@@ -51,14 +51,10 @@ async function update() {
       // Add X axis
       svg.selectAll("*").remove();
 
-      let ti = {}
-      if (types.length===1) {
-        if (types[0].name==="Covid") {
-          data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
-        } else {
-          data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
-        }
-          
+      if (types[0].name==="Covid") {
+        data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+      } else {
+        data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
       }
 
       const x = d3.scaleLinear()
@@ -74,6 +70,10 @@ async function update() {
     
       // Y axis
       const filtered = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
+      
+      y = d3.scaleBand()
+      .range([ 0, height ])
+      
       y
         .domain(filtered.map(f => f.Country))
         .padding(.1);
