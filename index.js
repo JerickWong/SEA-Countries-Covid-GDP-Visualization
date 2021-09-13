@@ -137,7 +137,8 @@ async function combinedGraph() {
   // Add X axis --> it is a date format
   const x = d3.scaleBand([0, width])
     .domain(quarters.map(q => q.name))
-    .rangeRound([ 0, width ]);
+    .rangeRound([ 0, width ])
+    .padding(1);
   
   svg.selectAll("*").remove();
   svg.append("g")
@@ -148,7 +149,8 @@ async function combinedGraph() {
   y = d3.scaleLinear()
     // .domain([0, d3.max(newData, function(d) { return +d.n; })])
     .domain(d3.extent(newData, function(d) { return +d.n; }))
-    .range([ height, 0 ]);
+    .range([ height, 0 ])
+
   svg.append("g")
     .call(d3.axisLeft(y));
 
