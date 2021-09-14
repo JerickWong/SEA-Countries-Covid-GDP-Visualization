@@ -20,7 +20,7 @@ const margin = {top: 20, right: 30, bottom: 40, left: 90},
     height = 400 - margin.top - margin.bottom;
 
 // append the svg object to the body of the page
-const svg = d3.select("#my_dataviz")
+let svg = d3.select("#my_dataviz")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -127,29 +127,35 @@ async function combinedGraph() {
   types = types.filter( t => t.checked)
   countries = countries.filter( c => c.checked)
   quarters = quarters.filter( q => q.checked)
-
-  if (types.length === 1 && types[0].name === "Covid") {
+  console.log(types)
+  if (types[0].name === "Covid") {
     data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
   } else {
     data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
   }
   
   data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
-  console.log(data)
 
-  const newData = [] 
+  let newData = [] 
   quarters.forEach(q => data.forEach(d => newData.push({Country: d.Country, year: q.name, n: Number(d[q.name])})))
   
   // group the data: I want to draw one line per group
-  const sumstat = d3.group(newData, d => d.Country); // nest function allows to group the calculation per level of a factor
-  console.log(newData)
+  let sumstat = d3.group(newData, d => d.Country); // nest function allows to group the calculation per level of a factor
+  
   // Add X axis --> it is a date format
-  const x = d3.scaleBand([0, width])
+  let x = d3.scaleBand([0, width])
     .domain(quarters.map(q => q.name))
     .rangeRound([ 0, width ])
     .padding(1);
   
-  svg.selectAll("*").remove();
+  d3.select("#my_dataviz").selectAll("*").remove();
+  svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .attr("style", "background-color: white;;margin: 20px")
+  .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
   svg.append("g")
     .attr("transform", `translate(0, ${height})`)
     .call(d3.axisBottom(x).ticks(5));
@@ -164,7 +170,7 @@ async function combinedGraph() {
     .call(d3.axisLeft(y));
 
   // color palette
-  const color = d3.scaleOrdinal()
+  let color = d3.scaleOrdinal()
     .range(filteredColors)
 
   // Draw the line
@@ -188,6 +194,71 @@ async function combinedGraph() {
   .attr("y", -5)
   .attr("x", 0)
   .text(types[0].name)
+
+  if (types.length === 2) {
+    data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
+
+    data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
+
+    newData = [] 
+    quarters.forEach(q => data.forEach(d => newData.push({Country: d.Country, year: q.name, n: Number(d[q.name])})))
+    
+    // group the data: I want to draw one line per group
+    sumstat = d3.group(newData, d => d.Country); // nest function allows to group the calculation per level of a factor
+    
+    // Add X axis --> it is a date format
+    x = d3.scaleBand([0, width])
+      .domain(quarters.map(q => q.name))
+      .rangeRound([ 0, width ])
+      .padding(1);
+    
+    const svg2 = d3.select("#my_dataviz")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("style", "background-color: white;;margin: 20px")
+    .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    svg2.append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(x).ticks(5));
+
+    // Add Y axis
+    y = d3.scaleLinear()
+      // .domain([0, d3.max(newData, function(d) { return +d.n; })])
+      .domain(d3.extent(newData, function(d) { return +d.n; }))
+      .range([ height, 0 ])
+
+    svg2.append("g")
+      .call(d3.axisLeft(y));
+
+    // color palette
+    color = d3.scaleOrdinal()
+      .range(filteredColors)
+
+    // Draw the line
+    svg2.selectAll(".line")
+        .data(sumstat)
+        .join("path")
+          .attr("fill", "none")
+          .attr("stroke", function(d){ return color(d[0]) })
+          .attr("stroke-width", 1.5)
+          .attr("d", function(d){
+            return d3.line()
+              .x(function(d) { return x(d.year); })
+              .y(function(d) { return y(+d.n); })
+              (d[1])
+          })
+      
+    // Add titles
+    svg2
+    .append("text")
+    .attr("text-anchor", "start")
+    .attr("y", -5)
+    .attr("x", 0)
+    .text(types[1].name)
+  }
 }
 
 async function multiGraph() {
@@ -259,7 +330,7 @@ async function multiGraph() {
   })
 }
 
-multiGraph()
+update()
 
 function reset(classname) {
   let types = Array.from(document.getElementsByClassName(classname))
