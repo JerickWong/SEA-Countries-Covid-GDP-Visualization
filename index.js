@@ -48,11 +48,12 @@ async function update() {
 
     if (combined.checked) {
       combinedGraph()
+    } else if (quarters.length === 1 && types.length === 1) {
+      quarterGraph()
+    } else {
+      multiGraph()
     }
 
-    else if (quarters.length === 1 && types.length === 1) {
-      quarterGraph()
-    }
 }
 
 async function combinedGraph() {
@@ -306,26 +307,30 @@ async function multiGraph() {
     quarters.forEach((q, i) => {
       for (let i=0; i<countries.length; i++) {
         newData.push({
-          Country: data1[i].Country,
+          Country: data1[i].Country + " Covid Cases",
           year: q.name,
           n: Number(data1[i][q.name])
         })
   
         newData.push({
-          Country: data2[i].Country+"(1)",
+          Country: data2[i].Country + " GDP Growth",
           year: q.name,
           n: Number(data2[i][q.name])
         })
       }
     })
-    console.log(newData)
+    
+    const twoColors = [...filteredColors]
+
+    filteredColors = []
+    twoColors.forEach(c => {filteredColors.push(c); filteredColors.push(c)})
   }
   
   // group the data: I want to draw one line per group
   const sumstat = d3.group(newData, d => d.Country); // nest function allows to group the calculation per level of a factor
   
   d3.select("#my_dataviz").selectAll("*").remove();
-  
+
   // Add an svg element for each group. The will be one beside each other and will go on the next row when no more room available
   const svg = d3.select("#my_dataviz")
     .selectAll("uniqueChart")
@@ -360,7 +365,7 @@ async function multiGraph() {
   const color = d3.scaleOrdinal()
     //.domain(allKeys)
     .range(filteredColors)
-  console.log('NP PA')
+  
   // Draw the line
   svg
     .append("path")
@@ -373,7 +378,6 @@ async function multiGraph() {
           .y(function(d) { return y(+d.n); })
           (d[1])
       })
-  console.log('AYAN NA NGA')
 
   // Add titles
   svg
@@ -385,7 +389,7 @@ async function multiGraph() {
     .style("fill", function(d){ return color(d[0]) })
 }
 
-multiGraph()
+update()
 
 function reset(classname) {
   let types = Array.from(document.getElementsByClassName(classname))
