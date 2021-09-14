@@ -56,6 +56,7 @@ async function update() {
     else if (quarters.length === 1 && types.length === 1) {
       // Add X axis
       svg.selectAll("*").remove();
+      const quart = quarters[0].name
 
       if (types[0].name==="Covid") {
         data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
@@ -64,7 +65,7 @@ async function update() {
       }
 
       const x = d3.scaleLinear()
-      .domain([d3.min(data, function(d) { return +d[quarters[0].name]; }), d3.max(data, function(d) { return +d[quarters[0].name] })])
+      .domain([d3.min(data, function(d) { return +d[quart]; }), d3.max(data, function(d) { return +d[quart] })])
       .range([ 0, width]);
 
       svg.append("g")
@@ -94,11 +95,19 @@ async function update() {
       u.join("rect")
       .transition()
       .duration(1000)
-        .attr("x", x(d3.min(data, function(d) { return +d[quarters[0].name]; })))
+        .attr("x", x(d3.min(data, function(d) { return +d[quart]; })))
         .attr("y", d => y(d.Country))
-        .attr("width", d => x(d[quarters[0].name]))
+        .attr("width", d => x(d[quart]))
         .attr("height", y.bandwidth())
         .attr("fill", "#5891ad")
+
+      // Add titles
+      svg
+      .append("text")
+      .attr("text-anchor", "start")
+      .attr("y", -5)
+      .attr("x", 0)
+      .text(`${quart.substring(0, 4)} ${toOrdinal(Number(quart.substring(5)))} Quarter`)
     }
 }
 
@@ -172,6 +181,13 @@ async function combinedGraph() {
             (d[1])
         })
     
+  // Add titles
+  svg
+  .append("text")
+  .attr("text-anchor", "start")
+  .attr("y", -5)
+  .attr("x", 0)
+  .text(types[0].name)
 }
 
 async function multiGraph() {
@@ -243,7 +259,7 @@ async function multiGraph() {
   })
 }
 
-update()
+multiGraph()
 
 function reset(classname) {
   let types = Array.from(document.getElementsByClassName(classname))
@@ -253,4 +269,10 @@ function reset(classname) {
   }
 
   update()
+}
+
+function toOrdinal(n) {
+  const s = ["th", "st", "nd", "rd"],
+      v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
