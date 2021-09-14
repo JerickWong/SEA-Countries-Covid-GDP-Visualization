@@ -1,4 +1,4 @@
-const colors = ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf','#999999', '#321231', '#002299']
+const colors = ['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#F3C60D','#a65628','#f781bf','#999999', '#321231', '#002299']
 
 const countries = Array.from(document.getElementsByClassName('countries'))
 countries.forEach((country, index) => {
