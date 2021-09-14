@@ -38,14 +38,11 @@ const yAxis = svg.append("g")
 async function update() {
 
     // Parse the Data
-    let data
-    let types = Array.from(document.getElementsByClassName('types'))
-    let countries = Array.from(document.getElementsByClassName('countries'))
     let quarters = Array.from(document.getElementsByClassName('quarters'))
-
-    types = types.filter( t => t.checked)
-    countries = countries.filter( c => c.checked)
+    let types = Array.from(document.getElementsByClassName('types'))
+    
     quarters = quarters.filter( q => q.checked)
+    types = types.filter( t => t.checked)
 
     let combined = document.getElementById('combined')
 
@@ -54,60 +51,7 @@ async function update() {
     }
 
     else if (quarters.length === 1 && types.length === 1) {
-      // Add X axis
-      svg.selectAll("*").remove();
-      const quart = quarters[0].name
-
-      if (types[0].name==="Covid") {
-        data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
-      } else {
-        data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
-      }
-
-      const x = d3.scaleLinear()
-      .domain([d3.min(data, function(d) { return +d[quart]; }), d3.max(data, function(d) { return +d[quart] })])
-      .range([ 0, width]);
-
-      svg.append("g")
-        .attr("transform", `translate(0, ${height})`)
-        .call(d3.axisBottom(x))
-        .selectAll("text")
-          .attr("transform", "translate(-10,0)rotate(-45)")
-          .style("text-anchor", "end");
-    
-      // Y axis
-      const filtered = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
-      
-      y = d3.scaleBand()
-      .range([ 0, height ])
-
-      y
-        .domain(filtered.map(f => f.Country))
-        .padding(.1);
-      svg.append("g")
-        .call(d3.axisLeft(y))
-
-      // variable u: map data to existing bars
-      const u = svg.selectAll("rect")
-      .data(filtered)
-
-      // update bars
-      u.join("rect")
-      .transition()
-      .duration(1000)
-        .attr("x", x(d3.min(data, function(d) { return +d[quart]; })))
-        .attr("y", d => y(d.Country))
-        .attr("width", d => x(d[quart]))
-        .attr("height", y.bandwidth())
-        .attr("fill", "#5891ad")
-
-      // Add titles
-      svg
-      .append("text")
-      .attr("text-anchor", "start")
-      .attr("y", -5)
-      .attr("x", 0)
-      .text(`${quart.substring(0, 4)} ${toOrdinal(Number(quart.substring(5)))} Quarter`)
+      quarterGraph()
     }
 }
 
@@ -259,6 +203,72 @@ async function combinedGraph() {
     .attr("x", 0)
     .text(types[1].name)
   }
+}
+
+async function quarterGraph() {
+  let data
+  let types = Array.from(document.getElementsByClassName('types'))
+  let countries = Array.from(document.getElementsByClassName('countries'))
+  let quarters = Array.from(document.getElementsByClassName('quarters'))
+
+  types = types.filter( t => t.checked)
+  countries = countries.filter( c => c.checked)
+  quarters = quarters.filter( q => q.checked)
+
+  svg.selectAll("*").remove();
+  const quart = quarters[0].name
+
+  if (types[0].name==="Covid") {
+    data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+  } else {
+    data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
+  }
+
+  // Add X axis
+  const x = d3.scaleLinear()
+  .domain([d3.min(data, function(d) { return +d[quart]; }), d3.max(data, function(d) { return +d[quart] })])
+  .range([ 0, width]);
+
+  svg.append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x))
+    .selectAll("text")
+      .attr("transform", "translate(-10,0)rotate(-45)")
+      .style("text-anchor", "end");
+
+  // Y axis
+  const filtered = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
+  
+  y = d3.scaleBand()
+  .range([ 0, height ])
+
+  y
+    .domain(filtered.map(f => f.Country))
+    .padding(.1);
+  svg.append("g")
+    .call(d3.axisLeft(y))
+
+  // variable u: map data to existing bars
+  const u = svg.selectAll("rect")
+  .data(filtered)
+
+  // update bars
+  u.join("rect")
+  .transition()
+  .duration(1000)
+    .attr("x", x(d3.min(data, function(d) { return +d[quart]; })))
+    .attr("y", d => y(d.Country))
+    .attr("width", d => x(d[quart]))
+    .attr("height", y.bandwidth())
+    .attr("fill", "#5891ad")
+
+  // Add titles
+  svg
+  .append("text")
+  .attr("text-anchor", "start")
+  .attr("y", -5)
+  .attr("x", 0)
+  .text(`${quart.substring(0, 4)} ${toOrdinal(Number(quart.substring(5)))} Quarter`)
 }
 
 async function multiGraph() {
