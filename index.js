@@ -273,74 +273,119 @@ async function quarterGraph() {
 
 async function multiGraph() {
   //Read the data
-  d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/5_OneCatSevNumOrdered.csv").then( function(data) {
-    
-    // group the data: I want to draw one line per group
-    const sumstat = d3.group(data, d => d.name) // nest function allows to group the calculation per level of a factor
+  let data, newData = [] 
+  let types = Array.from(document.getElementsByClassName('types'))
+  let countries = Array.from(document.getElementsByClassName('countries'))
+  let quarters = Array.from(document.getElementsByClassName('quarters'))
 
-    // What is the list of groups?
-    let allKeys = new Set(data.map(d=>d.name))
+  let filteredColors = [...colors]
 
-    // Add an svg element for each group. The will be one beside each other and will go on the next row when no more room available
-    const svg = d3.select("#my_dataviz")
-      .selectAll("uniqueChart")
-      .data(sumstat)
-      .enter()
-      .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .attr("style", "background-color: white;margin: 20px")
-      .append("g")
-        .attr("transform", 
-              `translate(${margin.left},${margin.top})`);
+  for (let i = countries.length-1; i >= 0; i--) {
+    if (!countries[i].checked)
+      filteredColors.splice(i, 1)
+  }
+  types = types.filter( t => t.checked)
+  countries = countries.filter( c => c.checked)
+  quarters = quarters.filter( q => q.checked)
+  
+  if (types.length === 1) {
+    if (types[0].name === "Covid") {
+      data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+    } else {
+      data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
+    }
+    data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
+    quarters.forEach(q => data.forEach(d => newData.push({Country: d.Country, year: q.name, n: Number(d[q.name])})))
+  } else {
+    let data1 = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+    let data2 = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
 
-    // Add X axis --> it is a date format
-    const x = d3.scaleLinear()
-      .domain(d3.extent(data, function(d) { return d.year; }))
-      .range([ 0, width ]);
-    svg
-      .append("g")
-      .attr("transform", `translate(0, ${height})`)
-      .call(d3.axisBottom(x).ticks(3));
+    data1 = data1.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
+    data2 = data2.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
 
-    //Add Y axis
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(data, function(d) { return +d.n; })])
-      .range([ height, 0 ]);
-    svg.append("g")
-      .call(d3.axisLeft(y).ticks(5));
-
-    // color palette
-    const color = d3.scaleOrdinal()
-      //.domain(allKeys)
-      .range(['#e41a1c','#377eb8','#4daf4a','#984ea3','#ff7f00','#ffff33','#a65628','#f781bf','#999999'])
-
-    // Draw the line
-    svg
-      .append("path")
-        .attr("fill", "none")
-        .attr("stroke", function(d){ return color(d[0]) })
-        .attr("stroke-width", 1.9)
-        .attr("d", function(d){
-          return d3.line()
-            .x(function(d) { return x(d.year); })
-            .y(function(d) { return y(+d.n); })
-            (d[1])
+    quarters.forEach((q, i) => {
+      for (let i=0; i<countries.length; i++) {
+        newData.push({
+          Country: data1[i].Country,
+          year: q.name,
+          n: Number(data1[i][q.name])
         })
+  
+        newData.push({
+          Country: data2[i].Country+"(1)",
+          year: q.name,
+          n: Number(data2[i][q.name])
+        })
+      }
+    })
+    console.log(newData)
+  }
+  
+  // group the data: I want to draw one line per group
+  const sumstat = d3.group(newData, d => d.Country); // nest function allows to group the calculation per level of a factor
+  
+  d3.select("#my_dataviz").selectAll("*").remove();
+  
+  // Add an svg element for each group. The will be one beside each other and will go on the next row when no more room available
+  const svg = d3.select("#my_dataviz")
+    .selectAll("uniqueChart")
+    .data(sumstat)
+    .enter()
+    .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .attr("style", "background-color: white;margin: 20px")
+    .append("g")
+      .attr("transform", 
+            `translate(${margin.left},${margin.top})`);
 
-    // Add titles
-    svg
-      .append("text")
-      .attr("text-anchor", "start")
-      .attr("y", -5)
-      .attr("x", 0)
-      .text(function(d){ return(d[0])})
-      .style("fill", function(d){ return color(d[0]) })
+  // Add X axis --> it is a date format
+  const x = d3.scaleBand()
+    .domain(quarters.map(q => q.name))
+    .rangeRound([ 0, width ])
+    .padding(1);
+  svg
+    .append("g")
+    .attr("transform", `translate(0, ${height})`)
+    .call(d3.axisBottom(x).ticks(3));
 
-  })
+  //Add Y axis
+  const y = d3.scaleLinear()
+    .domain(d3.extent(newData, function(d) { return +d.n; }))
+    .range([ height, 0 ]);
+  svg.append("g")
+    .call(d3.axisLeft(y).ticks(5));
+
+  // color palette
+  const color = d3.scaleOrdinal()
+    //.domain(allKeys)
+    .range(filteredColors)
+  console.log('NP PA')
+  // Draw the line
+  svg
+    .append("path")
+      .attr("fill", "none")
+      .attr("stroke", function(d){ return color(d[0]) })
+      .attr("stroke-width", 1.9)
+      .attr("d", function(d){
+        return d3.line()
+          .x(function(d) { return x(d.year); })
+          .y(function(d) { return y(+d.n); })
+          (d[1])
+      })
+  console.log('AYAN NA NGA')
+
+  // Add titles
+  svg
+    .append("text")
+    .attr("text-anchor", "start")
+    .attr("y", -5)
+    .attr("x", 0)
+    .text(function(d){ return(d[0])})
+    .style("fill", function(d){ return color(d[0]) })
 }
 
-update()
+multiGraph()
 
 function reset(classname) {
   let types = Array.from(document.getElementsByClassName(classname))
