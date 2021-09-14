@@ -216,7 +216,6 @@ async function quarterGraph() {
   countries = countries.filter( c => c.checked)
   quarters = quarters.filter( q => q.checked)
 
-  svg.selectAll("*").remove();
   const quart = quarters[0].name
 
   if (types[0].name==="Covid") {
@@ -224,6 +223,16 @@ async function quarterGraph() {
   } else {
     data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
   }
+
+  // Reset graph
+  d3.select("#my_dataviz").selectAll("*").remove();
+  svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .attr("style", "background-color: white;;margin: 20px")
+  .append("g")
+    .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
   // Add X axis
   const x = d3.scaleLinear()
