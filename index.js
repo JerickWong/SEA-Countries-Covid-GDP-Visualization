@@ -35,7 +35,7 @@ let y = d3.scaleBand()
   .range([ 0, height ])
 const yAxis = svg.append("g")
 
-async function update() {
+function update() {
 
     // Parse the Data
     let quarters = Array.from(document.getElementsByClassName('quarters'))
@@ -72,9 +72,9 @@ async function combinedGraph() {
   types = types.filter( t => t.checked)
   countries = countries.filter( c => c.checked)
   quarters = quarters.filter( q => q.checked)
-  console.log(types)
+  
   if (types[0].name === "Covid") {
-    data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+    data = await d3.csv("/data/SEA Quarterly Active COVID-19 Cases.csv")
   } else {
     data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
   }
@@ -219,7 +219,7 @@ async function quarterGraph() {
   const quart = quarters[0].name
 
   if (types[0].name==="Covid") {
-    data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+    data = await d3.csv("/data/SEA Quarterly Active COVID-19 Cases.csv")
   } else {
     data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
   }
@@ -300,14 +300,14 @@ async function multiGraph() {
   
   if (types.length === 1) {
     if (types[0].name === "Covid") {
-      data = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+      data = await d3.csv("/data/SEA Quarterly Active COVID-19 Cases.csv")
     } else {
       data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
     }
     data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
     quarters.forEach(q => data.forEach(d => newData.push({Country: d.Country, year: q.name, n: Number(d[q.name])})))
   } else {
-    let data1 = await d3.csv("/data/SEA Quarterly Confirmed COVID-19 Cases.csv")
+    let data1 = await d3.csv("/data/SEA Quarterly Active COVID-19 Cases.csv")
     let data2 = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
 
     data1 = data1.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
@@ -340,62 +340,123 @@ async function multiGraph() {
   
   d3.select("#my_dataviz").selectAll("*").remove();
 
-  // Add an svg element for each group. The will be one beside each other and will go on the next row when no more room available
-  const svg = d3.select("#my_dataviz")
-    .selectAll("uniqueChart")
-    .data(sumstat)
-    .enter()
-    .append("svg")
+  let i =0
+  sumstat.forEach(s => {
+    const sumstat2 = d3.group(s, d=>d.Country)
+    newData = Array.from(s)
+
+    const x = d3.scaleBand([0, width])
+      .domain(quarters.map(q => q.name))
+      .rangeRound([ 0, width ])
+      .padding(1);
+    
+    const svg2 = d3.select("#my_dataviz")
+      .append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
-      .attr("style", "background-color: white;margin: 20px")
+      .attr("style", "background-color: white;;margin: 20px")
     .append("g")
-      .attr("transform", 
-            `translate(${margin.left},${margin.top})`);
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-  // Add X axis --> it is a date format
-  const x = d3.scaleBand()
-    .domain(quarters.map(q => q.name))
-    .rangeRound([ 0, width ])
-    .padding(1);
-  svg
-    .append("g")
-    .attr("transform", `translate(0, ${height})`)
-    .call(d3.axisBottom(x).ticks(3));
+    svg2.append("g")
+      .attr("transform", `translate(0, ${height})`)
+      .call(d3.axisBottom(x).ticks(5));
 
-  //Add Y axis
-  const y = d3.scaleLinear()
-    .domain(d3.extent(newData, function(d) { return +d.n; }))
-    .range([ height, 0 ]);
-  svg.append("g")
-    .call(d3.axisLeft(y).ticks(5));
+    // Add Y axis
+    const y = d3.scaleLinear()
+      // .domain([0, d3.max(newData, function(d) { return +d.n; })])
+      .domain(d3.extent(newData, function(d) { return +d.n; }))
+      .range([ height, 0 ])
 
-  // color palette
-  const color = d3.scaleOrdinal()
-    //.domain(allKeys)
-    .range(filteredColors)
-  
-  // Draw the line
-  svg
-    .append("path")
-      .attr("fill", "none")
-      .attr("stroke", function(d){ return color(d[0]) })
-      .attr("stroke-width", 1.9)
-      .attr("d", function(d){
-        return d3.line()
-          .x(function(d) { return x(d.year); })
-          .y(function(d) { return y(+d.n); })
-          (d[1])
-      })
+    svg2.append("g")
+      .call(d3.axisLeft(y));
 
-  // Add titles
-  svg
+    // color palette
+    const color = d3.scaleOrdinal()
+      .range(filteredColors)
+
+    // Draw the line
+    svg2.selectAll(".line")
+        .data(sumstat2)
+        .join("path")
+          .attr("fill", "none")
+          .attr("stroke", function(d){ return color(d[i]) })
+          .attr("stroke-width", 1.5)
+          .attr("d", function(d){
+            return d3.line()
+              .x(function(d) { return x(d.year); })
+              .y(function(d) { return y(+d.n); })
+              (d[1])
+          })
+      
+    // Add titles
+    svg2
     .append("text")
     .attr("text-anchor", "start")
     .attr("y", -5)
     .attr("x", 0)
-    .text(function(d){ return(d[0])})
-    .style("fill", function(d){ return color(d[0]) })
+    .text(s[0].Country)
+    
+    filteredColors.shift();
+    i++
+  })
+
+  // Add an svg element for each group. The will be one beside each other and will go on the next row when no more room available
+  // const svg = d3.select("#my_dataviz")
+  //   .selectAll("uniqueChart")
+  //   .data(sumstat)
+  //   .enter()
+  //   .append("svg")
+  //     .attr("width", width + margin.left + margin.right)
+  //     .attr("height", height + margin.top + margin.bottom)
+  //     .attr("style", "background-color: white;margin: 20px")
+  //   .append("g")
+  //     .attr("transform", 
+  //           `translate(${margin.left},${margin.top})`);
+
+  // // Add X axis --> it is a date format
+  // const x = d3.scaleBand()
+  //   .domain(quarters.map(q => q.name))
+  //   .rangeRound([ 0, width ])
+  //   .padding(1);
+  // svg
+  //   .append("g")
+  //   .attr("transform", `translate(0, ${height})`)
+  //   .call(d3.axisBottom(x).ticks(3));
+
+  // //Add Y axis
+  // const y = d3.scaleLinear()
+  //   .domain(d3.extent(newData, function(d) { return +d.n; }))
+  //   .range([ height, 0 ]);
+  // svg.append("g")
+  //   .call(d3.axisLeft(y).ticks(5));
+
+  // // color palette
+  // const color = d3.scaleOrdinal()
+  //   //.domain(allKeys)
+  //   .range(filteredColors)
+  
+  // // Draw the line
+  // svg
+  //   .append("path")
+  //     .attr("fill", "none")
+  //     .attr("stroke", function(d){ return color(d[0]) })
+  //     .attr("stroke-width", 1.9)
+  //     .attr("d", function(d){
+  //       return d3.line()
+  //         .x(function(d) { return x(d.year); })
+  //         .y(function(d) { return y(+d.n); })
+  //         (d[1])
+  //     })
+
+  // // Add titles
+  // svg
+  //   .append("text")
+  //   .attr("text-anchor", "start")
+  //   .attr("y", -5)
+  //   .attr("x", 0)
+  //   .text(function(d){ return(d[0])})
+  //   .style("fill", function(d){ return color(d[0]) })
 }
 
 update()
