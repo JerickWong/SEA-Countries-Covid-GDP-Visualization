@@ -59,7 +59,7 @@ function update() {
 
 async function combinedGraph() {
 
-  let data
+  let data, title = "Active Covid-19 Cases", text = "↑ Active cases"
   let types = Array.from(document.getElementsByClassName('types'))
   let countries = Array.from(document.getElementsByClassName('countries'))
   let quarters = Array.from(document.getElementsByClassName('quarters'))
@@ -78,6 +78,8 @@ async function combinedGraph() {
     data = await d3.csv("/data/SEA Quarterly Active COVID-19 Cases.csv")
   } else {
     data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
+    title = "GDP Growth"
+    text = "↑ GDP"
   }
   
   data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
@@ -113,7 +115,14 @@ async function combinedGraph() {
     .range([ height, 0 ])
 
   svg.append("g")
-    .call(d3.axisLeft(y));
+    .call(d3.axisLeft(y))
+    .call(g => g.append("text")
+        .attr("x", -margin.left+5)
+        .attr("y", -5)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .attr("font-weight", 'bold')
+        .text(text));
 
   // color palette
   let color = d3.scaleOrdinal()
@@ -140,10 +149,12 @@ async function combinedGraph() {
   .attr("y", -5)
   .attr("x", 0)
   .attr("font-weight", 'bold')
-  .text(types[0].name)
+  .text(title)
 
   if (types.length === 2) {
     data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
+    title = "GDP Growth"
+    text = "↑ GDP"
 
     data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
 
@@ -178,7 +189,14 @@ async function combinedGraph() {
       .range([ height, 0 ])
 
     svg2.append("g")
-      .call(d3.axisLeft(yGDP));
+      .call(d3.axisLeft(yGDP))
+      .call(g => g.append("text")
+        .attr("x", -margin.left+25)
+        .attr("y", -5)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .attr("font-weight", 'bold')
+        .text(text));
 
     // color palette
     color = d3.scaleOrdinal()
@@ -205,7 +223,7 @@ async function combinedGraph() {
     .attr("y", -5)
     .attr("x", 0)
     .attr("font-weight", 'bold')
-    .text(types[1].name)
+    .text(title)
   }
 }
 
@@ -456,8 +474,8 @@ async function multiGraph() {
     svg2.append("g")
       .call(d3.axisLeft(y))
       .call(g => g.append("text")
-        .attr("x", -margin.left)
-        .attr("y", 10)
+        .attr("x", -margin.left+5)
+        .attr("y", -5)
         .attr("fill", "currentColor")
         .attr("text-anchor", "start")
         .attr("font-weight", 'bold')
