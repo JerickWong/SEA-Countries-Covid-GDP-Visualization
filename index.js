@@ -402,6 +402,9 @@ async function multiGraph() {
   sumstat.forEach(s => {
     const sumstat2 = d3.group(s, d=>d.Country)
     newData = Array.from(s)
+    let text = "↑ Active cases"
+    if (newData[0].Country.includes('GDP'))
+      text = "↑ GDP"
 
     const x = d3.scaleBand([0, width])
       .domain(quarters.map(q => q.name))
@@ -411,23 +414,29 @@ async function multiGraph() {
     const svg2 = d3.select("#my_dataviz")
       .append("svg")
       .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+      .attr("height", height + margin.top + margin.bottom - 300)
       .attr("style", "background-color: white;;margin: 20px")
     .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     svg2.append("g")
-      .attr("transform", `translate(0, ${height})`)
+      .attr("transform", `translate(0, ${height-300})`)
       .call(d3.axisBottom(x).ticks(5));
 
     // Add Y axis
     const y = d3.scaleLinear()
       // .domain([0, d3.max(newData, function(d) { return +d.n; })])
       .domain(d3.extent(newData, function(d) { return +d.n; }))
-      .range([ height, 0 ])
+      .range([ height - 300, 0 ])
 
     svg2.append("g")
-      .call(d3.axisLeft(y));
+      .call(d3.axisLeft(y))
+      .call(g => g.append("text")
+        .attr("x", -margin.left)
+        .attr("y", 10)
+        .attr("fill", "currentColor")
+        .attr("text-anchor", "start")
+        .text(text));
 
     // color palette
     const color = d3.scaleOrdinal()
