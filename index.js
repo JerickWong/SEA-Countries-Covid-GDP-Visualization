@@ -357,13 +357,15 @@ async function multiGraph() {
   quarters = quarters.filter( q => q.checked)
   
   if (types.length === 1) {
+    let title = "Covid Cases"
     if (types[0].name === "Covid") {
       data = await d3.csv("/data/SEA Quarterly Active COVID-19 Cases.csv")
     } else {
       data = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
+      title = "GDP Growth"
     }
     data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
-    quarters.forEach(q => data.forEach(d => newData.push({Country: d.Country, year: q.name, n: Number(d[q.name])})))
+    quarters.forEach(q => data.forEach(d => newData.push({Country: `${d.Country} ${title}`, year: q.name, n: Number(d[q.name])})))
   } else {
     let data1 = await d3.csv("/data/SEA Quarterly Active COVID-19 Cases.csv")
     let data2 = await d3.csv("/data/SEA Quarterly GDP Growth Rate.csv")
