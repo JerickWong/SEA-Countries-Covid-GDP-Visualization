@@ -139,6 +139,7 @@ async function combinedGraph() {
   .attr("text-anchor", "start")
   .attr("y", -5)
   .attr("x", 0)
+  .attr("font-weight", 'bold')
   .text(types[0].name)
 
   if (types.length === 2) {
@@ -203,6 +204,7 @@ async function combinedGraph() {
     .attr("text-anchor", "start")
     .attr("y", -5)
     .attr("x", 0)
+    .attr("font-weight", 'bold')
     .text(types[1].name)
   }
 }
@@ -246,7 +248,14 @@ async function quarterGraph() {
     .selectAll("text")
       .attr("transform", "translate(-10,0)rotate(-45)")
       .style("text-anchor", "end");
-
+  
+  svg.append("text")
+    .attr("class", "x label")
+    .attr("text-anchor", "end")
+    .attr("x", width-390)
+    .attr("y", height+30)
+    .attr("font-size", 15)
+    .text("Active cases →");
   // Y axis
   let filtered = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
   
@@ -279,6 +288,7 @@ async function quarterGraph() {
   .attr("text-anchor", "start")
   .attr("y", -5)
   .attr("x", 0)
+  .attr("font-weight", 'bold')
   .text(`${types[0].name} ${quart.substring(0, 4)} ${toOrdinal(Number(quart.substring(5)))} Quarter`)
 
   if (types.length === 2) {
@@ -304,6 +314,13 @@ async function quarterGraph() {
         .attr("transform", "translate(-10,0)rotate(-45)")
         .style("text-anchor", "end");
 
+    svg2.append("text")
+      .attr("class", "x label")
+      .attr("text-anchor", "end")
+      .attr("x", width-430) //410-
+      .attr("y", height+30)
+      .attr("font-size", 15)
+      .text("GDP →");
     // Y axis
     filtered = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
     
@@ -336,6 +353,7 @@ async function quarterGraph() {
     .attr("text-anchor", "start")
     .attr("y", -5)
     .attr("x", 0)
+    .attr("font-weight", 'bold')
     .text(`${types[1].name} ${quart.substring(0, 4)} ${toOrdinal(Number(quart.substring(5)))} Quarter`)
   }
 }
@@ -442,6 +460,7 @@ async function multiGraph() {
         .attr("y", 10)
         .attr("fill", "currentColor")
         .attr("text-anchor", "start")
+        .attr("font-weight", 'bold')
         .text(text));
 
     // color palette
@@ -468,6 +487,7 @@ async function multiGraph() {
     .attr("text-anchor", "start")
     .attr("y", -5)
     .attr("x", 0)
+    .attr("font-weight", 'bold')
     .text(s[0].Country)
     
     filteredColors.shift();
