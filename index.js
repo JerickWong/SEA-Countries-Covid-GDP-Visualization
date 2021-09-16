@@ -59,7 +59,7 @@ function update() {
 
 async function combinedGraph() {
 
-  let data, title = "Active Covid-19 Cases", text = "↑ Active cases"
+  let data, title = "Active Covid-19 Cases", text = "↑ Active cases", adjustment = 0
   let types = Array.from(document.getElementsByClassName('types'))
   let countries = Array.from(document.getElementsByClassName('countries'))
   let quarters = Array.from(document.getElementsByClassName('quarters'))
@@ -81,6 +81,9 @@ async function combinedGraph() {
     title = "GDP Growth"
     text = "↑ GDP"
   }
+
+  if (types.length === 1)
+    adjustment = 400
   
   data = data.filter(d => { if (countries.find(c => c.name === d.Country)) return d.Country})
 
@@ -91,15 +94,15 @@ async function combinedGraph() {
   let sumstat = d3.group(newData, d => d.Country); // nest function allows to group the calculation per level of a factor
   
   // Add X axis --> it is a date format
-  let x = d3.scaleBand([0, width])
+  let x = d3.scaleBand([0, width + adjustment])
     .domain(quarters.map(q => q.name))
-    .rangeRound([ 0, width ])
+    .rangeRound([ 0, width + adjustment ])
     .padding(1);
   
   d3.select("#my_dataviz").selectAll("*").remove();
   svg = d3.select("#my_dataviz")
   .append("svg")
-    .attr("width", width + margin.left + margin.right)
+    .attr("width", width + adjustment + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .attr("style", "background-color: white;;margin: 20px")
   .append("g")
