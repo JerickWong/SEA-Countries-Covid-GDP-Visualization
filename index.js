@@ -124,7 +124,7 @@ async function combinedGraph() {
       .join("path")
         .attr("fill", "none")
         .attr("stroke", function(d){ return color(d[0]) })
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 2.5)
         .attr("d", function(d){
           return d3.line()
             .x(function(d) { return x(d.year); })
@@ -188,7 +188,7 @@ async function combinedGraph() {
         .join("path")
           .attr("fill", "none")
           .attr("stroke", function(d){ return color(d[0]) })
-          .attr("stroke-width", 1.5)
+          .attr("stroke-width", 2.5)
           .attr("d", function(d){
             return d3.line()
               .x(function(d) { return x(d.year); })
@@ -448,7 +448,7 @@ async function multiGraph() {
         .join("path")
           .attr("fill", "none")
           .attr("stroke", function(d){ return color(d[i]) })
-          .attr("stroke-width", 1.5)
+          .attr("stroke-width", 2.5)
           .attr("d", function(d){
             return d3.line()
               .x(function(d) { return x(d.year); })
